@@ -27,7 +27,7 @@ if (empty($_SESSION['csrf'])) {
 
 // 4. Fetch Users with Role Info
 // Added 'created_at' to show how long they've been members
-$query = "SELECT u.id, u.name, u.email, r.name AS role_name, u.create_at 
+$query = "SELECT u.id, u.name, u.email, r.name AS role_name, u.created_at 
           FROM users u 
           LEFT JOIN roles r ON r.id = u.role_id 
           ORDER BY u.id DESC";
@@ -159,7 +159,7 @@ $result = $db->query($query);
                                                     </div>
                                                     <div>
                                                         <div class="fw-bold text-dark"><?= htmlspecialchars($u['name']) ?></div>
-                                                        <div class="small text-muted">Joined <?= date('M Y', strtotime($u['create_at'])) ?></div>
+                                                        <div class="small text-muted">Joined <?= date('M Y', strtotime($u['created_at'])) ?></div>
                                                     </div>
                                                 </div>
                                             </td>

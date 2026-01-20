@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class='bx bx-show' onclick="toggle('conf_p', this)"></i>
         </div>
 
-        <button type="submit">Update Account</button>
+        <button type="submit" onclick="window.href='settings.php'">Update Account</button>
     </form>
 </div>
 

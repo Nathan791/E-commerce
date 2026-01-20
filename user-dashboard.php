@@ -156,7 +156,7 @@ $userName = htmlspecialchars($_SESSION["name"] ?? 'User');
         <i class='bx bx-store-alt'></i>
         <h4>Shop</h4>
         <p>Discover new arrivals and top deals.</p>
-        <a href="/COMMERCE/shop.php" class="btn-link">Go to Shop &rarr;</a>
+        <a href="/Commerce/shop.php" class="btn-link">Go to Shop &rarr;</a>
     </div>
 
     <div class="card">
