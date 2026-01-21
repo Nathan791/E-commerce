@@ -70,7 +70,7 @@ $result = $stmt->get_result();
     </nav>
 
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="admin-dashboard.php" class="brand-link text-center">
+        <a href="user-dashboard.php" class="brand-link text-center">
             <span class="brand-text font-weight-light">🛒 COMMERCE</span>
         </a>
         <div class="sidebar">

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// 1. Access Control: Ensure user is logged in
+// 1. Access Control
 if (!isset($_SESSION["id"])) {
     header("Location: /COMMERCE/login.php");
     exit();
@@ -10,17 +10,17 @@ if (!isset($_SESSION["id"])) {
 $user_id = $_SESSION["id"];
 
 /* ===============================
-   DB CONNECTION & QUERY
+    DB CONNECTION & QUERY
 ================================ */
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    // In a real project, move connection details to a config.php file
+    // Optimization: Use a central config file for these details
     $db = new mysqli("localhost", "root", "", "commerce");
     $db->set_charset("utf8mb4");
 
     $stmt = $db->prepare("
-        SELECT id, created_at, total, status 
+        SELECT id, total, status, created_at 
         FROM orders 
         WHERE user_id = ? 
         ORDER BY created_at DESC
@@ -31,8 +31,7 @@ try {
     $result = $stmt->get_result();
 
 } catch (mysqli_sql_exception $e) {
-    // Log error internally, show user a clean message
-    error_log($e->getMessage());
+    error_log("Order History Error: " . $e->getMessage());
     die("Unable to fetch order history. Please try again later.");
 }
 ?>
@@ -47,6 +46,7 @@ try {
         body { background-color: #f8f9fa; padding-top: 50px; }
         .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .table thead { background-color: #f1f3f5; }
+        .badge-pending { background-color: #ffc107; color: #000; } /* Example of custom styling */
     </style>
 </head>
 <body>
@@ -84,7 +84,8 @@ try {
                             </td>
                             <td>
                                 <?php 
-                                    $statusClass = match($order['status']) {
+                                    $status = $order['status'];
+                                    $statusClass = match($status) {
                                         'completed' => 'success',
                                         'cancelled' => 'danger',
                                         'shipped'   => 'info',
@@ -92,11 +93,11 @@ try {
                                     };
                                 ?>
                                 <span class="badge rounded-pill bg-<?= $statusClass ?>">
-                                    <?= ucfirst(htmlspecialchars($order['status'])) ?>
+                                    <?= ucfirst(htmlspecialchars($status)) ?>
                                 </span>
                             </td>
                             <td class="text-end pe-3">
-                                <a href="order-details.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-light border">View Details</a>
+                                <a href="order-details.php?id=<?= (int)$order['id'] ?>" class="btn btn-sm btn-light border shadow-sm">View Details</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
@@ -107,7 +108,6 @@ try {
 </div>
 
 <?php 
-// Clean up
 $stmt->close();
 $db->close(); 
 ?>

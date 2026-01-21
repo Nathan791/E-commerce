@@ -25,6 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $email = trim($_POST["email"] ?? "");
         $password = $_POST["password"] ?? "";
 
+        // 2. Validation
+    if (strlen($name) < 3) $errors[] = "Name must be at least 3 characters.";
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format.";
+    if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters.";
         if ($name === "" || $email === "" || $password === "") {
             $errorMessage = "All fields are required.";
         } else {
@@ -78,98 +82,97 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-</head>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        padding: 20px;
-        background-color: #f4f4f4;
-    }
-    h1 {
-        color: #333;
-        margin: auto;
-        display: flex;
-    }
-    form {
-         max-width: 300px;
-                margin: auto;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                background-color: #fff;
-    }
-    label {
-        display: inline-block;
-        width: 100px;
-        margin-bottom: 10px;
-    }
-    input[type="text"], input[type="email"], input[type="password"], select {
-        width: 200px;
-        padding: 5px;
-        margin-bottom: 10px;
-    }
-    input[type="submit"] {
-        padding: 10px 20px;
-        background-color: #28a745;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-    input[type="submit"]:hover {
-        background-color: #218838;
-    }
+    <title>Sign Up | Premium Store</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; }
+        .signup-card { max-width: 450px; width: 100%; margin: auto; border: none; border-radius: 12px; }
+        .input-group-text { cursor: pointer; background: white; }
     </style>
+</head>
 <body>
 
-<h1>Sign Up</h1>
+<div class="container">
+    <div class="card signup-card shadow-sm p-4">
+        <div class="d-flex align-items-center mb-4">
+            <a href="javascript:history.back()" class="text-dark me-2"><i class='bx bx-left-arrow-alt fs-2'></i></a>
+            <h2 class="h4 m-0 fw-bold">Create Account</h2>
+        </div>
 
-<?php if (!empty($errorMessage)) echo "<p style='color:red'>$errorMessage</p>"; ?>
-<?php if (!empty($successMessage)) echo "<p style='color:green'>$successMessage</p>"; ?>
+        <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger py-2 small">
+                <ul class="mb-0">
+                    <?php foreach($errors as $error) echo "<li>$error</li>"; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
-<form method="post">
+        <form method="POST" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
-    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Username</label>
+                <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($name) ?>" placeholder="Full Name" required>
+            </div>
 
-    <label>Username:</label>
-    <input type="text" name="name" value="<?= htmlspecialchars($name) ?>" required>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Email Address</label>
+                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($email) ?>" placeholder="name@company.com" required>
+            </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 characters"  required>
+                    <span class="input-group-text" id="togglePassword">
+                        <i class='bx bx-show'></i>
+                    </span>
+                </div>
+            </div>
 
-    <label>Password:</label>
-    <input type="password" name="password" required>
+            
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-primary">Assign Account Role</label>
+                <select name="role" class="form-select border-primary">
+                    <option value="user">User (Default)</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+             
 
-   
-        <label>Role:</label>
-        <select name="role">
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-        </select>
-    <br>
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mb-3 shadow-sm">Sign Up</button>
 
-    <input type="submit" value="Sign Up">
-     <p class="text-center text-sm mt-4">
-            If You have already an account?
-            <a href="/COMMERCE/login.php" class="text-blue-600">Sign In</a>
-
-        </p>
-
-</form>
-
+            <p class="text-center small text-muted">
+                By signing up, you agree to our <a href="#" class="text-decoration-none">Terms</a>.
+            </p>
+            
+            <hr>
+            
+            <p class="text-center small">
+                Already registered? <a href="login.php" class="fw-bold text-decoration-none">Sign In</a>
+            </p>
+        </form>
+    </div>
+</div>
 
 <script>
-      document.getElementById('goBackBtn').onclick = () => window.history.back();
-   </script>
+    // Password Toggle Logic
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function (e) {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('bx-show');
+        this.querySelector('i').classList.toggle('bx-hide');
+    });
+</script>
+
 </body>
 </html>

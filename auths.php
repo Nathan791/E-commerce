@@ -2,10 +2,7 @@
 session_start();
 $connection = new mysqli("localhost","root","","commerce");
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: /COMMERCE/login.php");
-    exit();
-}
+
 
 function can($permission) {
     global $connection;

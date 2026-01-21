@@ -1,88 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-<html>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us</title>
+    <title>About Us | Commerce</title>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        body {
-            background-color: #f5f5f5;
-            color: #222;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            transition: background-color .3s ease, color .3s ease;
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --nav-link: #007bff;
+            --border-color: #dee2e6;
         }
-        .dark body {
-            background-color: #121212;
-            color: #ddd;
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --header-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --nav-link: #379aff;
+            --border-color: #333333;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
         }
 
         header {
-            background: #fff;
-            padding: 15px 40px;
-            border-bottom: 1px solid #e2e2e2;
+            background-color: var(--header-bg);
+            padding: 1rem 5%;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background-color .3s ease, border-color .3s ease;
-        }
-        .dark header {
-            background: #1e1e1e;
-            border-bottom-color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        h1 {
-            margin-bottom: 20px;
-        }
-        form {
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: background-color .3s ease;
-        }
-        .dark form {
-            background: #1e1e1e;
-            box-shadow: 0 3px 10px rgba(255,255,255,0.05);
-        }
-        nav {
-            padding: 15px 40px;
+        nav ul {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
         }
-        nav:hover {
-            background-color: #f0f0f0;
+
+        nav a {
+            text-decoration: none;
+            color: var(--nav-link);
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        nav a:hover {
+            opacity: 0.7;
+        }
+
+        .toggle-theme {
+            cursor: pointer;
+            font-size: 1.4rem;
+            color: var(--text-color);
+            background: none;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-theme:hover {
+            transform: scale(1.1);
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-top: 50px;
         }
     </style>
-    <body>
+</head>
+<body>
+
     <header> 
-        <h2>About Us</h2>
+        <h2 class="h4 m-0 fw-bold">Commerce<span class="text-primary">Store</span></h2>
+        
         <nav>
-            <li><a href="user-dashboard.php">Main Page</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="service.html">services</a></li>
+            <ul>
+                <li><a href="user-dashboard.php">Home</a></li>
+                <li><a href="service.html">Services</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
         </nav>
-        <div class="toggle-container">
+
+        <button class="toggle-theme" id="themeToggle" aria-label="Toggle Dark Mode">
             <i class="fas fa-moon"></i>
-        </div>
+        </button>
     </header>
-    <main class="container mt-5">
-        <h1>About Our Company</h1>
-        <p>Welcome to our company! We are dedicated to providing the best services to our customers. Our team is passionate about delivering quality and excellence in everything we do.</p>
-        <p>Our mission is to create value for our clients through innovative solutions and exceptional customer service. We believe in building long-term relationships based on trust and integrity.</p>
-        <p>Thank you for choosing us. We look forward to serving you!</p>
+
+    <main class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 content-card">
+                <h1 class="mb-4 fw-bold">About Our Company</h1>
+                <p class="lead">Welcome to our company! We are dedicated to providing the best services to our customers.</p>
+                <hr class="my-4">
+                <p>Our team is passionate about delivering quality and excellence in everything we do. Our mission is to create value for our clients through innovative solutions and exceptional customer service.</p>
+                <p>We believe in building long-term relationships based on trust and integrity. Thank you for choosing us. We look forward to serving you!</p>
+                
+                <div class="mt-5">
+                    <a href="contact.html" class="btn btn-primary px-4 py-2">Get In Touch</a>
+                </div>
+            </div>
+        </div>
     </main>
-    
-    </body>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.documentElement; // Targets <html> to use [data-theme]
+        const icon = themeToggle.querySelector('i');
+
+        // Check for saved user preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+            updateIcon(savedTheme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            let currentTheme = body.getAttribute('data-theme');
+            let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            if (theme === 'dark') {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                icon.style.color = '#ffc107'; // Sun yellow
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                icon.style.color = '';
+            }
+        }
+    </script>
+
+</body>
 </html>

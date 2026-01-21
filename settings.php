@@ -145,6 +145,14 @@ $userName = htmlspecialchars($_SESSION["name"] ?? 'User');
             </div>
             <i class='bx bx-chevron-right'></i>
         </a>
+        
+        <a href="about.html" class="settings-item">
+            <div class="item-info">
+                <i class='bx bx-info-circle'></i>
+                <span>About Commerce</span>
+            </div>
+            <i class='bx bx-chevron-right'></i>
+        </a>
 
         <hr style="opacity: 0.1; margin: 10px 0;">
 
