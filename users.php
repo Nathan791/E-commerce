@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Check if user is logged in AND is an admin
 if (!isset($_SESSION['id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-    header("Location: /COMMERCE/login.php?error=unauthorized");
+    header("Location: login.php?error=unauthorized");
     exit();
 }
 
@@ -26,7 +26,6 @@ if (empty($_SESSION['csrf'])) {
 }
 
 // 4. Fetch Users with Role Info
-// Added 'created_at' to show how long they've been members
 $query = "SELECT u.id, u.name, u.email, r.name AS role_name, u.created_at 
           FROM users u 
           LEFT JOIN roles r ON r.id = u.role_id 
@@ -50,15 +49,15 @@ $result = $db->query($query);
         body { font-family: 'Inter', sans-serif; }
         .user-avatar {
             width: 40px; height: 40px;
-            background: #6366f1; border-radius: 10px;
-            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 10px; display: inline-flex; 
+            align-items: center; justify-content: center;
             margin-right: 12px; font-weight: 600; color: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .table-middle td { vertical-align: middle; padding: 1rem 0.75rem; }
         .badge-subtle { padding: 0.5em 0.8em; border-radius: 6px; font-weight: 500; }
-        .card { border-radius: 12px; }
-        .btn-action { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+        .btn-action { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; transition: 0.2s; }
+        .btn-action:hover { transform: translateY(-1px); }
     </style>
 </head>
 
@@ -72,9 +71,9 @@ $result = $db->query($query);
             </li>
         </ul>
         <ul class="navbar-nav ms-auto pe-3">
-            <li class="nav-item dropdown">
-                <a class="nav-link" href="/COMMERCE/logout.php">
-                    <i class="fas fa-sign-out-alt text-danger"></i> Logout
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="logout.php">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </li>
         </ul>
@@ -93,7 +92,7 @@ $result = $db->query($query);
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="users_management.php" class="nav-link active">
+                        <a href="users.php" class="nav-link active">
                             <i class="nav-icon fas fa-user-shield"></i> <p>User Controls</p>
                         </a>
                     </li>
@@ -103,9 +102,9 @@ $result = $db->query($query);
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="orders_management.php" class="nav-link">
-                            <i class="nav-icon fas fa-receipt"></i> <p>Orders</p>
-                        </a>
+                        <a href="order_management.php" class="nav-link">
+                            <i class="nav-icon fas fa-shopping-cart"></i> <p>Orders</p>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -120,7 +119,7 @@ $result = $db->query($query);
                         <p class="text-muted small">Manage permissions and account status for all members.</p>
                     </div>
                     <div class="col-sm-6 text-sm-end">
-                        <a href="create_users.php" class="btn btn-indigo shadow-sm px-4">
+                        <a href="create_users.php" class="btn btn-primary shadow-sm px-4">
                             <i class="fas fa-plus-circle me-2"></i> Add Account
                         </a>
                     </div>
@@ -146,8 +145,9 @@ $result = $db->query($query);
                                 <tbody>
                                     <?php if ($result->num_rows > 0): ?>
                                         <?php while ($u = $result->fetch_assoc()): 
-                                            $isAdmin = (strtolower($u['role_name']) === 'admin');
-                                            $badgeColor = $isAdmin ? 'danger' : 'primary';
+                                            $role = $u['role_name'] ?? 'User';
+                                            $isAdmin = (strtolower($role) === 'admin');
+                                            $badgeClass = $isAdmin ? 'danger' : 'primary';
                                             $initials = strtoupper(substr($u['name'], 0, 1));
                                         ?>
                                         <tr>
@@ -163,27 +163,28 @@ $result = $db->query($query);
                                                     </div>
                                                 </div>
                                             </td>
+                                            <td><span class="text-dark"><?= htmlspecialchars($u['email']) ?></span></td>
                                             <td>
-                                                <span class="text-dark"><?= htmlspecialchars($u['email']) ?></span>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-subtle bg-<?= $badgeColor ?>-subtle text-<?= $badgeColor ?>">
+                                                <span class="badge badge-subtle bg-<?= $badgeClass ?>-subtle text-<?= $badgeClass ?>">
                                                     <i class="fas <?= $isAdmin ? 'fa-user-cog' : 'fa-user' ?> me-1"></i>
-                                                    <?= ucfirst(htmlspecialchars($u['role_name'] ?? 'User')) ?>
+                                                    <?= ucfirst(htmlspecialchars($role)) ?>
                                                 </span>
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-flex justify-content-end gap-2">
-                                                    <a href="users-edit.php?id=<?= (int)$u['id'] ?>" 
-                                                       class="btn btn-action btn-outline-warning" title="Edit Permissions">
+                                                    <a href="users-edit.php?id=<?= (int)$u['id'] ?>" class="btn btn-action btn-outline-warning" title="Edit Permissions">
                                                         <i class="fas fa-pen-nib"></i>
                                                     </a>
                                                     
+                                                    <a href="user-edit.php?id=<?= (int)$u['id'] ?>" class="btn btn-action btn-outline-info" title="Edit User Details">
+                                                        <i class="fas fa-user-edit"></i>
+                                                    </a>
+
                                                     <form action="user-delete.php" method="POST" class="d-inline">
                                                         <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                                                         <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
                                                         <button type="submit" class="btn btn-action btn-outline-danger" 
-                                                                onclick="return confirm('WARNING: Are you sure? This user will be permanently removed.')">
+                                                                onclick="return confirm('WARNING: Permanent removal. Continue?')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -208,8 +209,7 @@ $result = $db->query($query);
         </section>
     </div>
 
-    <footer class="main-footer bg-white border-top-0 small text-muted">
-        <div class="float-right d-none d-sm-inline">v2.1.0</div>
+    <footer class="main-footer bg-white border-top-0 small text-muted text-center">
         <strong>&copy; <?= date('Y') ?> Commerce Admin Ecosystem.</strong>
     </footer>
 </div>

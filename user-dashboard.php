@@ -3,7 +3,7 @@ session_start();
 
 // 1. Centralized Auth Check
 if (!isset($_SESSION["email"])) {
-    header("Location: /COMMERCE/login.php");
+    header("Location: /E-commerce-main/COMMERCE/login.php");
     exit();
 }
 
@@ -137,7 +137,7 @@ $userName = htmlspecialchars($_SESSION["name"] ?? 'User');
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
             <a href="/COMMERCE/admin-dashboard.php">Admin Panel</a>
         <?php endif; ?>
-        <a href="/COMMERCE/logout.php" class="text-danger">Logout</a>
+        <a href="/COMMERCE/E-commerce-main/logout.php" class="text-danger">Logout</a>
         <span class="toggle-btn" id="themeToggle">🌙</span>
     </nav>
 
@@ -149,14 +149,14 @@ $userName = htmlspecialchars($_SESSION["name"] ?? 'User');
         <i class='bx bx-shopping-bag'></i>
         <h4>My Orders</h4>
         <p>Track shipments and view past purchases.</p>
-        <a href="/Commerce/order_history.php" class="btn-link">History &rarr;</a>
+        <a href="/Commerce/E-commerce-main/order_history.php" class="btn-link">History &rarr;</a>
     </div>
 
     <div class="card">
         <i class='bx bx-store-alt'></i>
         <h4>Shop</h4>
         <p>Discover new arrivals and top deals.</p>
-        <a href="/Commerce/shop.php" class="btn-link">Go to Shop &rarr;</a>
+        <a href="/Commerce/E-commerce-main/shop.php" class="btn-link">Go to Shop &rarr;</a>
     </div>
 
     <div class="card">

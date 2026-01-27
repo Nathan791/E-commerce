@@ -7,8 +7,8 @@ $config = [
     'db_user' => 'root',
     'db_pass' => '',
     'db_name' => 'commerce',
-    'admin_path' => '/COMMERCE/admin-dashboard.php',
-    'user_path'  => '/COMMERCE/user-dashboard.php'
+    'admin_path' => '/COMMERCE/E-commerce-main/admin-dashboard.php',
+    'user_path'  => '/COMMERCE/E-commerce-main/user-dashboard.php'
 ];
 
 // 2. Redirect if already logged in
@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <p class="text-center mt-4 mb-0">
                 Don’t have an account? 
-                <a href="/COMMERCE/create_users.php" class="text-decoration-none">Sign Up</a>
+                <a href="/COMMERCE/E-commerce-main/create_users.php" class="text-decoration-none">Sign Up</a>
             </p>
         </form>
     </div>
