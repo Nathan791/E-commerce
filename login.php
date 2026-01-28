@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $db->set_charset("utf8mb4");
 
             $stmt = $db->prepare("SELECT id, name, email, password, role FROM users WHERE email = ? LIMIT 1");
-            $stmt->bind_param("s", $email);
+            $stmt->bind_param("isssi", $name,$email, $password, $role);
             $stmt->execute();
             $result = $stmt->get_result();
 
@@ -69,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign-In | Commerce</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
         .login-container { max-width: 400px; margin-top: 100px; }
@@ -92,9 +93,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                        value="<?= htmlspecialchars($email ?? '') ?>" required>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Password</label>
-                <input type="password" name="password" class="form-control" required>
+           <div class="mb-3">
+                <label class="form-label small fw-semibold">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 characters" required>
+                    <span class="input-group-text" id="togglePassword">
+                        <i class='bx bx-show'></i>
+                    </span>
+                </div>
             </div>
 
             <div class="d-grid gap-2 mt-4">
@@ -109,5 +115,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 </div>
 
+<script>
+    // Improved Toggle Logic
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('bx-show');
+        this.querySelector('i').classList.toggle('bx-hide');
+    });
+</script>
 </body>
 </html>

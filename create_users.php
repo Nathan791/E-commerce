@@ -1,81 +1,61 @@
 <?php
 session_start();
 
-$name = "";
-$email = "";
-$errorMessage = "";
+// Initialize variables
+$name = $email = "";
+$errors = [];
 $successMessage = "";
 
-// CSRF Token
+// 1. Generate CSRF Token
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    // CSRF check
-    if (
-        !isset($_POST['csrf_token']) ||
-        !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
-    ) {
-        $errorMessage = "Invalid request.";
+    // 2. CSRF check
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $errors[] = "Security token mismatch. Please try again.";
     } else {
 
-        $name = trim($_POST["name"] ?? "");
-        $email = trim($_POST["email"] ?? "");
+        // 3. Collect and Sanitize Data
+        $name     = trim($_POST["name"] ?? "");
+        $email    = trim($_POST["email"] ?? "");
         $password = $_POST["password"] ?? "";
+        $role     = $_POST["role"] ?? "user"; // Assign the role from POST
 
-        // 2. Validation
-    if (strlen($name) < 3) $errors[] = "Name must be at least 3 characters.";
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format.";
-    if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters.";
-        if ($name === "" || $email === "" || $password === "") {
-            $errorMessage = "All fields are required.";
-        } else {
-
+        // 4. Validation Logic
+        if (strlen($name) < 3) $errors[] = "Name must be at least 3 characters.";
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format.";
+        if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters.";
+        
+        // Final check before Database
+        if (empty($errors)) {
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
             try {
                 $db = new mysqli("localhost", "root", "", "commerce");
                 $db->set_charset("utf8mb4");
 
-                // Email unique
+                // Check if Email exists
                 $check = $db->prepare("SELECT id FROM users WHERE email = ?");
                 $check->bind_param("s", $email);
                 $check->execute();
-                $check->store_result();
-
-                if ($check->num_rows > 0) {
-                    $errorMessage = "Email already exists.";
+                if ($check->get_result()->num_rows > 0) {
+                    $errors[] = "This email is already registered.";
                 } else {
-
-                    // 🔒 ROLE CONTROL
-                    $role = "user";
-                    if (
-                        isset($_SESSION["role"]) &&
-                        $_SESSION["role"] === "admin" &&
-                        isset($_POST["role"]) &&
-                        in_array($_POST["role"], ["user", "admin"], true)
-                    ) {
-                        $role = $_POST["role"];
-                    }
-
+                    // Hash password and Insert
                     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
-                    $stmt = $db->prepare(
-                        "INSERT INTO users (name, email, password, role)
-                         VALUES (?, ?, ?, ?)"
-                    );
-
+                    $stmt = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
                     $stmt->bind_param("ssss", $name, $email, $hashed_password, $role);
-                    $stmt->execute();
-
-                    $successMessage = "Account created successfully.";
-                    $name = $email = "";
-                }
-
+                    
+                    if ($stmt->execute()) {
+                        $successMessage = "Account created successfully! You can now sign in.";
+                        $name = $email = ""; // Clear form
+                    }
+                }        
             } catch (Exception $e) {
-                $errorMessage = "Server error.";
+                error_log($e->getMessage());
+                $errors[] = "A system error occurred. Please try again later.";
             }
         }
     }
@@ -91,26 +71,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
-        body { background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; }
-        .signup-card { max-width: 450px; width: 100%; margin: auto; border: none; border-radius: 12px; }
-        .input-group-text { cursor: pointer; background: white; }
+        body { background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; font-family: 'Inter', sans-serif; }
+        .signup-card { max-width: 450px; width: 100%; margin: auto; border: none; border-radius: 16px; }
+        .form-control:focus { box-shadow: none; border-color: #0d6efd; }
+        .input-group-text { background: white; border-left: none; cursor: pointer; }
+        #password { border-right: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card signup-card shadow-sm p-4">
+<div class="container py-5">
+    <div class="card signup-card shadow-lg p-4">
         <div class="d-flex align-items-center mb-4">
             <a href="javascript:history.back()" class="text-dark me-2"><i class='bx bx-left-arrow-alt fs-2'></i></a>
             <h2 class="h4 m-0 fw-bold">Create Account</h2>
-        </div>
-
+        </div>  
         <?php if (!empty($errors)): ?>
             <div class="alert alert-danger py-2 small">
                 <ul class="mb-0">
-                    <?php foreach($errors as $error) echo "<li>$error</li>"; ?>
+                    <?php foreach($errors as $error) echo "<li>" . htmlspecialchars($error) . "</li>"; ?>
                 </ul>
             </div>
+        <?php endif; ?>
+
+        <?php if ($successMessage): ?>
+            <div class="alert alert-success small py-2"><?= $successMessage ?></div>
         <?php endif; ?>
 
         <form method="POST" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
@@ -129,32 +114,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="mb-3">
                 <label class="form-label small fw-semibold">Password</label>
                 <div class="input-group">
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 characters"  required>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 characters" required>
                     <span class="input-group-text" id="togglePassword">
                         <i class='bx bx-show'></i>
                     </span>
                 </div>
-            </div>
+            </div> 
 
-            
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="form-label small fw-bold text-primary">Assign Account Role</label>
-                <select name="role" class="form-select border-primary">
-                    <option value="user">User (Default)</option>
-                    <option value="admin">Administrator</option>
+                <select name="role" class="form-select border-primary shadow-sm">
+                    <option value="user">User (Customer)</option>
+                    <option value="admin">Admins</option>
                 </select>
             </div>
-             
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mb-3 shadow-sm">Sign Up</button>
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mb-3 shadow-sm">
+                Create Account
+            </button>
 
             <p class="text-center small text-muted">
-                By signing up, you agree to our <a href="#" class="text-decoration-none">Terms</a>.
-            </p>
-            
-            <hr>
-            
-            <p class="text-center small">
                 Already registered? <a href="login.php" class="fw-bold text-decoration-none">Sign In</a>
             </p>
         </form>
@@ -162,11 +141,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </div>
 
 <script>
-    // Password Toggle Logic
+    // Improved Toggle Logic
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
 
-    togglePassword.addEventListener('click', function (e) {
+    togglePassword.addEventListener('click', function () {
         const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
         password.setAttribute('type', type);
         this.querySelector('i').classList.toggle('bx-show');

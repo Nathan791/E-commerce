@@ -135,7 +135,7 @@ $userName = htmlspecialchars($_SESSION["name"] ?? 'User');
         <a href="/COMMERCE/profile.php">Profile</a>
         <a href="/COMMERCE/cart.php">My Cart</a>
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-            <a href="/COMMERCE/admin-dashboard.php">Admin Panel</a>
+            <a href="/COMMERCE/E-commerce-main/admin-dashboard.php">Admin Panel</a>
         <?php endif; ?>
         <a href="/COMMERCE/E-commerce-main/logout.php" class="text-danger">Logout</a>
         <span class="toggle-btn" id="themeToggle">🌙</span>
