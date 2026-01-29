@@ -20,7 +20,8 @@ if (isset($_SESSION["role"])) {
 
 $errorMessage = "";
 
-// 3. Handle Login Logic
+// ... (Your config and redirect logic remain the same) ...
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = filter_var(trim($_POST["email"] ?? ""), FILTER_SANITIZE_EMAIL);
     $password = $_POST["password"] ?? "";
@@ -32,32 +33,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $db = new mysqli($config['db_host'], $config['db_user'], $config['db_pass'], $config['db_name']);
             $db->set_charset("utf8mb4");
 
-            $stmt = $db->prepare("SELECT id, name, email, password, role FROM users WHERE email = ? LIMIT 1");
-            $stmt->bind_param("isssi", $name,$email, $password, $role);
+            // 1. Only select the record where the email matches
+            $stmt = $db->prepare("SELECT id, name, email, password, roles FROM users WHERE email = ? LIMIT 1");
+            
+            // 2. ONLY bind the email (the '?' in the query)
+            $stmt->bind_param("s", $email); 
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($user = $result->fetch_assoc()) {
+                // 3. Verify the submitted password against the hash in the DB
                 if (password_verify($password, $user["password"])) {
-                    // Prevent Session Fixation
                     session_regenerate_id(true);
 
                     $_SESSION["id"]    = $user["id"];
                     $_SESSION["name"]  = $user["name"];
                     $_SESSION["email"] = $user["email"];
-                    $_SESSION["role"]  = $user["role"];
+                    // Ensure this key matches your DB column 'roles'
+                    $_SESSION["role"]  = $user["roles"]; 
 
-                    $redirect = ($user["role"] === "admin") ? $config['admin_path'] : $config['user_path'];
+                    $redirect = ($user["roles"] === "admin") ? $config['admin_path'] : $config['user_path'];
                     header("Location: $redirect");
                     exit();
                 }
             }
+            
+            // Generic error for security (don't tell them IF the email exists)
             $errorMessage = "Invalid email or password.";
             $stmt->close();
             $db->close();
+            
         } catch (Exception $e) {
-            error_log($e->getMessage()); // Log error to server, don't show user sensitive info
-            $errorMessage = "A connection error occurred. Please try again later.";
+            error_log($e->getMessage());
+            $errorMessage = "A connection error occurred.";
         }
     }
 }

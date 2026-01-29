@@ -25,17 +25,17 @@ if (!$user) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name  = $_POST["name"];
     $email = $_POST["email"];
-    $role  = $_POST["role"];
+    $role  = $_POST["roles"];
     $password = $_POST["password"];
 
     if (!empty($password)) {
         // Update everything INCLUDING password
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $stmt = $db->prepare("UPDATE users SET name=?, email=?, role=?, password=? WHERE id=?");
+        $stmt = $db->prepare("UPDATE users SET name=?, email=?, roles=?, password=? WHERE id=?");
         $stmt->bind_param("ssssi", $name, $email, $role, $hashedPassword, $id);
     } else {
         // Update everything EXCEPT password
-        $stmt = $db->prepare("UPDATE users SET name=?, email=?, role=? WHERE id=?");
+        $stmt = $db->prepare("UPDATE users SET name=?, email=?, roles=? WHERE id=?");
         $stmt->bind_param("sssi", $name, $email, $role, $id);
     }
 
@@ -83,11 +83,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
 
             <div class="mb-3">
-                 <label for="password" class="form-label">New Password</label>
-                 <small class="text-muted d-block mb-2">(Leave blank to keep current password)</small>
-                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••">
+                <label class="form-label small fw-semibold">Password</label>
+                <small class="text-muted d-block mb-2">(Leave blank to keep current password)</small>
+                <div class="input-group">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Min. 6 characters" required>
+                    <span class="input-group-text" id="togglePassword">
+                        <i class='bx bx-show'></i>
+                    </span>
+                </div>
             </div>
-               
+                
             <div class="mb-4">
                 <label for="role" class="form-label">Access Level</label>
                 <select class="form-select" id="role" name="role" required>
@@ -104,6 +109,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </form>
     </div>
 </div>
+<script>
+    // Improved Toggle Logic
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
 
+    togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('bx-show');
+        this.querySelector('i').classList.toggle('bx-hide');
+    });
+</script>
 </body>
 </html>

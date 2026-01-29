@@ -88,7 +88,7 @@ try {
         ],
     ]);
 
-    header("HTTP/1.1 303 See          Other");
+    header("HTTP/1.1 303 See Other");
     header("Location: " . $session->url);
 } catch (Exception $e) {
     error_log("Stripe Error: " . $e->getMessage());

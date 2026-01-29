@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Initialize variables
 $name = $email = "";
 $errors = [];
 $successMessage = "";
@@ -22,16 +21,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $name     = trim($_POST["name"] ?? "");
         $email    = trim($_POST["email"] ?? "");
         $password = $_POST["password"] ?? "";
-        $role     = $_POST["role"] ?? "user"; // Assign the role from POST
+        // FIX: Ensure variable name matches what you use in bind_param
+        $role     = $_POST["roles"] ?? "user"; 
 
         // 4. Validation Logic
         if (strlen($name) < 3) $errors[] = "Name must be at least 3 characters.";
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format.";
         if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters.";
         
-        // Final check before Database
         if (empty($errors)) {
-            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
             try {
                 $db = new mysqli("localhost", "root", "", "commerce");
                 $db->set_charset("utf8mb4");
@@ -40,19 +38,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $check = $db->prepare("SELECT id FROM users WHERE email = ?");
                 $check->bind_param("s", $email);
                 $check->execute();
+                
                 if ($check->get_result()->num_rows > 0) {
                     $errors[] = "This email is already registered.";
                 } else {
-                    // Hash password and Insert
-                    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-                    $stmt = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    // Ensure 'roles' matches your actual DB column name
+                    $stmt = $db->prepare("INSERT INTO users (name, email, password, roles) VALUES (?, ?, ?, ?)");
                     $stmt->bind_param("ssss", $name, $email, $hashed_password, $role);
                     
                     if ($stmt->execute()) {
                         $successMessage = "Account created successfully! You can now sign in.";
                         $name = $email = ""; // Clear form
                     }
-                }        
+                    $stmt->close();
+                }
+                $check->close();
+                $db->close();
+
             } catch (Exception $e) {
                 error_log($e->getMessage());
                 $errors[] = "A system error occurred. Please try again later.";
@@ -123,9 +126,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <div class="mb-4">
                 <label class="form-label small fw-bold text-primary">Assign Account Role</label>
-                <select name="role" class="form-select border-primary shadow-sm">
-                    <option value="user">User (Customer)</option>
-                    <option value="admin">Admins</option>
+                <select name="roles" class="form-select border-primary shadow-sm">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
                 </select>
             </div>
 

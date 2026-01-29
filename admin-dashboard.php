@@ -7,6 +7,8 @@ $db_user = "root";
 $db_pass = "";
 $db_name = "commerce";
 
+$userName = htmlspecialchars($_SESSION["name"] ?? 'User');
+
 $connection = new mysqli($db_host, $db_user, $db_pass, $db_name);
 if ($connection->connect_error) {
     die("Connection failed: " . $connection->connect_error);
@@ -77,7 +79,7 @@ while ($row = $statusQuery->fetch_assoc()) {
                 <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <span class="nav-link"><strong>Welcome, Admin</strong></span>
+                <span class="nav-link"><strong>Welcome, Admin <?= $userName ?></strong></span>
             </li>
         </ul>
     </nav>
@@ -90,7 +92,7 @@ while ($row = $statusQuery->fetch_assoc()) {
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                     <li class="nav-item"><a href="user-dashboard.php" class="nav-link active"><i class="nav-icon fas fa-tachometer-alt"></i> <p>Dashboard</p></a></li>
-                    <li class="nav-item"><a href="orders_management.php" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i> <p>Orders</p></a></li>
+                    <li class="nav-item"><a href="order_management.php" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i> <p>Orders</p></a></li>
                     <li class="nav-item"><a href="users.php" class="nav-link"><i class="nav-icon fas fa-users"></i> <p>Users</p></a></li>
                     <li class="nav-item"><a href="shop_management.php" class="nav-link"><i class="nav-icon fas fa-store"></i> <p>Shop</p></a></li>
                     <li class="nav-header">ACCOUNT</li>
